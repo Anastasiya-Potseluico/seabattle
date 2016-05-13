@@ -35,6 +35,9 @@ public class Player extends Agent{
     // 1 - клетка с кораблем
     private int[][] _playField = new int[10][10];
 
+    private int _currentEnemyHittedX = -1;
+    private int _currentEnemyHittedY = -1;
+
     @Override
     protected void setup() {
         Scanner fileReader = null;
@@ -64,15 +67,33 @@ public class Player extends Agent{
     // Класс атаки на вражескую клетку
     class MakeFire extends OneShotBehaviour {
 
-        private AID _enemyAgent = null;
-        private int _hitXCoordinate = -1;
-        private int _hitYCoordinate = -1;
+        private MessageTemplate _mt;
+        private AID _enemyAgent = null; // Как его получить - ХЗ!!!!!!!!!!
 
         @Override
         public void action() {
             // Если нет убитых клеток на поле врага - отправить любую пустую клетку, иначе
             // Отправить две координаты на основании правил
+            if(_currentEnemyHittedX == -1) {
+                // Выбрать рандомный выстрел по пустым клеткам
 
+            } else {
+                // Выбрать по правилам новые x и y.
+                String x = "3";
+                String y = "3";
+
+                // Отослать сообщение об ударе
+                ACLMessage missMessage = new ACLMessage(ACLMessage.INFORM);
+                missMessage.addReceiver(_enemyAgent);
+                missMessage.setConversationId("hitCoordinates");
+                missMessage.setContent(x + "," + y);
+                _mt = MessageTemplate.and(
+                        MessageTemplate.MatchPerformative(ACLMessage.INFORM),
+                        MessageTemplate.MatchConversationId("hitCoordinates")
+                );
+                myAgent.send(missMessage);
+                System.out.println("Sent coordinates" + x + "," + y);
+            }
         }
     }
 
@@ -168,7 +189,7 @@ public class Player extends Agent{
                 if(coordinates.length == 2) {
                     _x = Integer.parseInt(coordinates[0]);
                     _y = Integer.parseInt(coordinates[1]);
-                    System.out.println("Coordinates "+ msg.getContent()+" gotten");
+                    System.out.println("Coordinates " + msg.getContent() + " gotten");
                 } else {
                     System.out.println("Only two coordinates are available to be sent!");
                 }
