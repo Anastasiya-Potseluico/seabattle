@@ -57,6 +57,8 @@ public class Player extends Agent{
         }
         addBehaviour(new GetResponseFromEnemy());
         addBehaviour(new MakeFire());
+        addBehaviour(new SendResponseToEnemy());
+        addBehaviour(new GetCoordinatesFromEnemy());
     }
 
     // Класс атаки на вражескую клетку
@@ -80,27 +82,31 @@ public class Player extends Agent{
         private AID _enemyAgent = null;
         private MessageTemplate _mt;
 
-        public SendResponseToEnemy(AID enemyAgent) {
+       /* public SendResponseToEnemy(AID enemyAgent) {
             super();
             _enemyAgent = enemyAgent;
-        }
+        }*/
 
         // Метод для проверки попадания врага в свой корабль
         private void AnalyzeEnemyAttack(int x, int y) {
-            if(_playField[x][y] == 1) {
-                // Отправить факт hit или ship
+            if(x < 10 && x > -1 && y < 10 && y > -1) {
+                if (_playField[x][y] == 1) {
+                    // Отправить факт hit или ship
+                } else {
+                    // Отправить сообщение о промахе
+                    ACLMessage missMessage = new ACLMessage(ACLMessage.INFORM);
+                    missMessage.addReceiver(_enemyAgent);
+                    missMessage.setConversationId("shotResult");
+                    missMessage.setContent("miss");
+                    _mt = MessageTemplate.and(
+                            MessageTemplate.MatchPerformative(ACLMessage.INFORM),
+                            MessageTemplate.MatchConversationId("shotResult")
+                    );
+                    myAgent.send(missMessage);
+                    System.out.println("Sent miss message");
+                }
             } else {
-                // Отправить сообщение о промахе
-                ACLMessage missMessage = new ACLMessage(ACLMessage.INFORM);
-                missMessage.addReceiver(_enemyAgent);
-                missMessage.setConversationId("getLatestMessages");
-                missMessage.setContent("miss");
-                _mt = MessageTemplate.and(
-                        MessageTemplate.MatchPerformative(ACLMessage.INFORM),
-                        MessageTemplate.MatchConversationId("shotResult")
-                );
-                myAgent.send(missMessage);
-                System.out.println("Sent miss message");
+                System.out.println("Wrong coordinates");
             }
         }
 
@@ -162,6 +168,7 @@ public class Player extends Agent{
                 if(coordinates.length == 2) {
                     _x = Integer.parseInt(coordinates[0]);
                     _y = Integer.parseInt(coordinates[1]);
+                    System.out.println("Coordinates "+ msg.getContent()+" gotten");
                 } else {
                     System.out.println("Only two coordinates are available to be sent!");
                 }
