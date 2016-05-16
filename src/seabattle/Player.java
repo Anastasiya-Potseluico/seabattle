@@ -4,7 +4,7 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
-import javafx.util.Pair;
+//import javafx.util.Pair;
 import jdk.nashorn.internal.runtime.Debug;
 import jade.core.AID;
 import jade.core.Agent;
@@ -17,6 +17,8 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jess.*;
+
+import java.io.FileReader;
 import java.util.*;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -27,6 +29,7 @@ import java.io.IOException;
  */
 public class Player extends Agent{
 
+    private static final int MAX_PASSES = 2;
     // 0 - неизвестная клетка
     // 1 - убитая клетка
     // -1 - пустая клетка
@@ -158,12 +161,35 @@ public class Player extends Agent{
 
                         break;
                     case "ship":
-                        // Пометить клетки вокруг корабля как пустые
+                        try {
+                            // Пометить клетки вокруг корабля как пустые
 
-                        // Изменить базу фактов в jess о состоянии поля противника
+                            // Изменить базу фактов в jess о состоянии поля противника
+                            FileReader program = new FileReader(new File("seabattlerules.clp"));
+                            Rete jess = new Rete();
+                            Jesp parser = new Jesp(program, jess);
+                            parser.parse(false);
+                            program.close();
 
-                        break;
-                }
+                            jess.addUserfunction(new MarkShip());
+
+                            Deftemplate factTemplate = jess.findDeftemplate("ship");
+                            // Очистить базу фактов.
+                            jess.reset();
+
+                            // Добавить факт - сообщение, проверяемое на спам.
+                            Fact ship = new Fact(factTemplate);
+                            //ship.setSlotValue("x", new Value(msg.getKey(), RU.INTEGER));
+                            //ship.setSlotValue("y", new Value(msg.getValue(), RU.STRING));
+                            jess.assertFact(ship);
+
+                            // Запустить выполнение.
+                            jess.run(MAX_PASSES);
+                        } catch (JessException | IOException e) {
+                            e.printStackTrace();
+                        }
+                                break;
+                        }
             } else {
                 block();
             }
@@ -196,6 +222,25 @@ public class Player extends Agent{
             } else {
                 block();
             }
+        }
+    }
+    class MarkShip implements Userfunction {
+        @Override
+        public String getName() {
+            return "markship";
+        }
+
+        @Override
+        public Value call(ValueVector valueVector, Context context) throws JessException {
+
+            ACLMessage reportSpam = new ACLMessage(ACLMessage.REQUEST);
+            //reportSpam.addReceiver(_boxAgent);
+            //reportSpam.setConversationId("markBoatAsShip");
+            //reportSpam.setContent(valueVector.get(1).stringValue(context));
+            //myAgent.send(reportSpam);
+            System.out.println("Sent a ship message.");
+
+            return Funcall.TRUE;
         }
     }
 }
