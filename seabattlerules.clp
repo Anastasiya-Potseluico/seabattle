@@ -1,4 +1,7 @@
 (reset)
+;
+; Шаблоны клеток
+;
 
 ; Шаблон, описывающий нетронутую ячейку.
 (deftemplate empty
@@ -23,6 +26,14 @@
     (slot x)
     (slot y)
 )
+
+;
+; Правила выстрелов во врага
+;
+; Правила для двух клеток
+;
+
+
 ; Правило удара: если два попадания по вертикали и снизу не били, сделать удар снизу.
 (defrule newhit2dowm
     (hit (x ?x) (y ?y1))
@@ -101,6 +112,11 @@
     )
     (facts)
 )
+; --------------------------------------------------
+;
+; Правила для одной клетки
+;
+
 ; Правило удара: если одно попадание по вертикали и снизу не били, сделать удар снизу.
 (defrule newhit1dowm
     (hit (x ?x) (y ?y1))
@@ -186,6 +202,195 @@
     )
     (facts)
 )
+; --------------------------------------------------
+;
+; Определим что корабль уничтожен
+;
+; Убит 4х палубиник вертикально расположенный: сделать его утонувшим.
+; две клетки пустые
+(defrule ship4vertical
+    ?hit1 <- (hit (x ?x) (y ?y1))
+    ?hit2 <- (hit (x ?x) (y ?y2))
+    ?hit3 <- (hit (x ?x) (y ?y3))
+    ?hit4 <- (hit (x ?x) (y ?y4))
+    ?empty1 <- (empty (x ?x) (y ?y0))
+    ?empty2 <- (empty (x ?x) (y ?y5))
+    (test (= ?y1 (+ ?y0 1)))
+    (test (= ?y2 (+ ?y1 1)))
+    (test (= ?y3 (+ ?y2 1)))
+    (test (= ?y4 (+ ?y3 1)))
+    (test (= ?y5 (+ ?y4 1)))
+    =>
+    (retract ?hit1)
+    (assert
+        (ship
+            (x ?x)
+            (y ?y1)
+        )
+    )
+    (retract ?hit2)
+    (assert
+        (ship
+            (x ?x)
+            (y ?y2)
+        )
+    )
+    (retract ?hit3)
+    (assert
+        (ship
+            (x ?x)
+            (y ?y3)
+        )
+    )
+    (retract ?hit4)
+    (assert
+        (ship
+            (x ?x)
+            (y ?y4)
+        )
+    )
+    (facts)
+)
+
+; Убит 4х палубиник вертикально расположенный: сделать его утонувшим.
+; две клетки промахи
+(defrule ship4vertical
+    ?hit1 <- (hit (x ?x) (y ?y1))
+    ?hit2 <- (hit (x ?x) (y ?y2))
+    ?hit3 <- (hit (x ?x) (y ?y3))
+    ?hit4 <- (hit (x ?x) (y ?y4))
+    ?empty1 <- (miss (x ?x) (y ?y0))
+    ?empty2 <- (miss (x ?x) (y ?y5))
+    (test (= ?y1 (+ ?y0 1)))
+    (test (= ?y2 (+ ?y1 1)))
+    (test (= ?y3 (+ ?y2 1)))
+    (test (= ?y4 (+ ?y3 1)))
+    (test (= ?y5 (+ ?y4 1)))
+    =>
+    (retract ?hit1)
+    (assert
+        (ship
+            (x ?x)
+            (y ?y1)
+        )
+    )
+    (retract ?hit2)
+    (assert
+        (ship
+            (x ?x)
+            (y ?y2)
+        )
+    )
+    (retract ?hit3)
+    (assert
+        (ship
+            (x ?x)
+            (y ?y3)
+        )
+    )
+    (retract ?hit4)
+    (assert
+        (ship
+            (x ?x)
+            (y ?y4)
+        )
+    )
+    (facts)
+)
+; Убит 4х палубиник вертикально расположенный: сделать его утонувшим.
+; пустая клетка и промах
+(defrule ship4vertical
+    ?hit1 <- (hit (x ?x) (y ?y1))
+    ?hit2 <- (hit (x ?x) (y ?y2))
+    ?hit3 <- (hit (x ?x) (y ?y3))
+    ?hit4 <- (hit (x ?x) (y ?y4))
+    ?empty1 <- (empty (x ?x) (y ?y0))
+    ?empty2 <- (miss (x ?x) (y ?y5))
+    (test (= ?y1 (+ ?y0 1)))
+    (test (= ?y2 (+ ?y1 1)))
+    (test (= ?y3 (+ ?y2 1)))
+    (test (= ?y4 (+ ?y3 1)))
+    (test (= ?y5 (+ ?y4 1)))
+    =>
+    (retract ?hit1)
+    (assert
+        (ship
+            (x ?x)
+            (y ?y1)
+        )
+    )
+    (retract ?hit2)
+    (assert
+        (ship
+            (x ?x)
+            (y ?y2)
+        )
+    )
+    (retract ?hit3)
+    (assert
+        (ship
+            (x ?x)
+            (y ?y3)
+        )
+    )
+    (retract ?hit4)
+    (assert
+        (ship
+            (x ?x)
+            (y ?y4)
+        )
+    )
+    (facts)
+)
+; Убит 4х палубиник вертикально расположенный: сделать его утонувшим.
+; промах и пустая клетка
+(defrule ship4vertical
+    ?hit1 <- (hit (x ?x) (y ?y1))
+    ?hit2 <- (hit (x ?x) (y ?y2))
+    ?hit3 <- (hit (x ?x) (y ?y3))
+    ?hit4 <- (hit (x ?x) (y ?y4))
+    ?empty1 <- (miss (x ?x) (y ?y0))
+    ?empty2 <- (empty (x ?x) (y ?y5))
+    (test (= ?y1 (+ ?y0 1)))
+    (test (= ?y2 (+ ?y1 1)))
+    (test (= ?y3 (+ ?y2 1)))
+    (test (= ?y4 (+ ?y3 1)))
+    (test (= ?y5 (+ ?y4 1)))
+    =>
+    (retract ?hit1)
+    (assert
+        (ship
+            (x ?x)
+            (y ?y1)
+        )
+    )
+    (retract ?hit2)
+    (assert
+        (ship
+            (x ?x)
+            (y ?y2)
+        )
+    )
+    (retract ?hit3)
+    (assert
+        (ship
+            (x ?x)
+            (y ?y3)
+        )
+    )
+    (retract ?hit4)
+    (assert
+        (ship
+            (x ?x)
+            (y ?y4)
+        )
+    )
+    (facts)
+)
+; --------------------------------------------------
+;
+; Убит корабль сделаем все клетки вокруг корабля промахами.
+;
 ; Убит корабль: сделать пустые клетки промахами слева.
 (defrule shipleft
     (ship (x ?x1) (y ?y))
@@ -310,6 +515,7 @@
     )
     (facts)
 )
+; --------------------------------------------------
 ; Начальная расстановка попаданий и свободных ячеек на поле 1x3.
 (assert
     (hit
