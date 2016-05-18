@@ -32,7 +32,9 @@
     (slot x)
     (slot y)
 )
-
+(deftemplate nothitted)
+(deftemplate notgameover)
+(deftemplate gameover)
 ;
 ; Правила выстрелов во врага
 ;
@@ -48,11 +50,11 @@
     (test (= ?y2 (+ ?y1 1)))
     (test (= ?ey (+ ?y2 1)))
     ?nothitted <- (nothitted)
+    ?game <- (notgameover)
     =>
     (retract ?nothitted)
     (retract ?empty)
     (assert (hitted (x ?x) (y ?ey)))
-    (assert (hit (x ?x) (y ?ey)))
     (facts)
 )
 
@@ -64,11 +66,11 @@
     (test (= ?y2 (+ ?y1 1)))
     (test (= ?y1 (+ ?ey 1)))
     ?nothitted <- (nothitted)
+    ?game <- (notgameover)
     =>
     (retract ?nothitted)
     (retract ?empty)
     (assert (hitted (x ?x) (y ?ey)))
-    (assert (hit (x ?x) (y ?ey)))
     (facts)
 )
 ; Правило удара: если два попадания по горизонтали и справа не били, сделать удар справа.
@@ -79,11 +81,11 @@
     (test (= ?x2 (+ ?x1 1)))
     (test (= ?ex (+ ?x2 1)))
     ?nothitted <- (nothitted)
+    ?game <- (notgameover)
     =>
     (retract ?nothitted)
     (retract ?empty)
-    (assert (hitted (x ?x) (y ?ey)))
-    (assert (hit (x ?ex) (y ?y)))
+    (assert (hitted (x ?ex) (y ?y)))
     (facts)
 )
 
@@ -95,11 +97,11 @@
     (test (= ?x2 (+ ?x1 1)))
     (test (= ?x1 (+ ?ex 1)))
     ?nothitted <- (nothitted)
+    ?game <- (notgameover)
     =>
     (retract ?nothitted)
     (retract ?empty)
-    (assert (hitted (x ?x) (y ?ey)))
-    (assert (hit (x ?ex) (y ?y)))
+    (assert (hitted (x ?ex) (y ?y)))
     (facts)
 )
 ; --------------------------------------------------
@@ -112,11 +114,11 @@
     (hit (x ?x) (y ?y1))
     ?empty <- (empty (x ?x) (y ?ey))
     (test (= ?ey (+ ?y1 1)))
-    (nothitted)
+    ?nothitted <- (nothitted)
+    ?game <- (notgameover)
     =>
     (retract ?empty)
     (assert (hitted (x ?x) (y ?ey)))
-    (assert (hit (x ?x) (y ?ey)))
     (facts)
 )
 
@@ -126,11 +128,11 @@
     ?empty <- (empty (x ?x) (y ?ey))
     (test (= ?y1 (+ ?ey 1)))
     ?nothitted <- (nothitted)
+    ?game <- (notgameover)
     =>
     (retract ?nothitted)
     (retract ?empty)
     (assert (hitted (x ?x) (y ?ey)))
-    (assert (hit (x ?x) (y ?ey)))
     (facts)
 )
 ; Правило удара: если одно попадание по горизонтали и справа не били, сделать удар справа.
@@ -139,11 +141,11 @@
     ?empty <- (empty (x ?ex) (y ?y))
     (test (= ?ex (+ ?x1 1)))
     ?nothitted <- (nothitted)
+    ?game <- (notgameover)
     =>
     (retract ?nothitted)
     (retract ?empty)
     (assert (hitted (x ?x) (y ?ey)))
-    (assert (hit (x ?ex) (y ?y)))
     (facts)
 )
 
@@ -153,22 +155,22 @@
     ?empty <- (empty (x ?ex) (y ?y))
     (test (= ?x1 (+ ?ex 1)))
     ?nothitted <- (nothitted)
+    ?game <- (notgameover)
     =>
     (retract ?nothitted)
     (retract ?empty)
-    (assert (hitted (x ?x) (y ?ey)))
-    (assert (hit (x ?ex) (y ?y)))
+    (assert (hitted (x ?ex) (y ?y)))
     (facts)
 )
 ; Правило удара: если нет попаданий.
-(defrule newhit1left
+(defrule newhit
     ?empty <- (empty (x ?ex) (y ?y))
     ?nothitted <- (nothitted)
+    ?game <- (notgameover)
     =>
     (retract ?nothitted)
     (retract ?empty)
-    (assert (hitted (x ?x) (y ?ey)))
-    (assert (hit (x ?ex) (y ?y)))
+    (assert (hitted (x ?ex) (y ?y)))
     (facts)
 )
 ; --------------------------------------------------
@@ -310,29 +312,3 @@
     (facts)
 )
 ; --------------------------------------------------
-
-; Начальная расстановка попаданий и свободных ячеек на поле 1x3.
-(assert
-    (hit
-        (x 1)
-        (y 1)
-    )
-)
-
-(assert
-    (hit
-        (x 1)
-        (y 2)
-    )
-)
-
-(assert
-    (empty
-        (x 1)
-        (y 3)
-    )
-)
-
-
-(facts)
-(run)
