@@ -27,6 +27,12 @@
     (slot y)
 )
 
+; Ўаблон, описывающий утонувший корабль.
+(deftemplate hitted
+    (slot x)
+    (slot y)
+)
+
 ;
 ; ѕравила выстрелов во врага
 ;
@@ -44,13 +50,8 @@
     (test hitted)
     =>
     (retract ?empty)
-    (assert hitted)
-    (assert
-        (hit
-            (x ?x)
-            (y ?ey)
-        )
-    )
+    (assert (hitted (x ?x) (y ?ey)))
+    (assert (hit (x ?x) (y ?ey)))
     (facts)
 )
 
@@ -64,13 +65,8 @@
     (test hitted)
     =>
     (retract ?empty)
-    (assert hitted)
-    (assert
-        (hit
-            (x ?x)
-            (y ?ey)
-        )
-    )
+    (assert (hitted (x ?x) (y ?ey)))
+    (assert (hit (x ?x) (y ?ey)))
     (facts)
 )
 ; ѕравило удара: если два попадани€ по горизонтали и справа не били, сделать удар справа.
@@ -83,13 +79,8 @@
     (test hitted)
     =>
     (retract ?empty)
-    (assert hitted)
-    (assert
-        (hit
-            (x ?ex)
-            (y ?y)
-        )
-    )
+    (assert (hitted (x ?x) (y ?ey)))
+    (assert (hit (x ?ex) (y ?y)))
     (facts)
 )
 
@@ -103,13 +94,8 @@
     (test hitted)
     =>
     (retract ?empty)
-    (assert hitted)
-    (assert
-        (hit
-            (x ?ex)
-            (y ?y)
-        )
-    )
+    (assert (hitted (x ?x) (y ?ey)))
+    (assert (hit (x ?ex) (y ?y)))
     (facts)
 )
 ; --------------------------------------------------
@@ -125,13 +111,8 @@
     (test hitted)
     =>
     (retract ?empty)
-    (assert hitted)
-    (assert
-        (hit
-            (x ?x)
-            (y ?ey)
-        )
-    )
+    (assert (hitted (x ?x) (y ?ey)))
+    (assert (hit (x ?x) (y ?ey)))
     (facts)
 )
 
@@ -143,13 +124,8 @@
     (test hitted)
     =>
     (retract ?empty)
-    (assert hitted)
-    (assert
-        (hit
-            (x ?x)
-            (y ?ey)
-        )
-    )
+    (assert (hitted (x ?x) (y ?ey)))
+    (assert (hit (x ?x) (y ?ey)))
     (facts)
 )
 ; ѕравило удара: если одно попадание по горизонтали и справа не били, сделать удар справа.
@@ -160,13 +136,8 @@
     (test hitted)
     =>
     (retract ?empty)
-    (assert hitted)
-    (assert
-        (hit
-            (x ?ex)
-            (y ?y)
-        )
-    )
+    (assert (hitted (x ?x) (y ?ey)))
+    (assert (hit (x ?ex) (y ?y)))
     (facts)
 )
 
@@ -178,13 +149,8 @@
     (test hitted)
     =>
     (retract ?empty)
-    (assert hitted)
-    (assert
-        (hit
-            (x ?ex)
-            (y ?y)
-        )
-    )
+    (assert (hitted (x ?x) (y ?ey)))
+    (assert (hit (x ?ex) (y ?y)))
     (facts)
 )
 ; ѕравило удара: если нет попаданий.
@@ -193,16 +159,150 @@
     (test hitted)
     =>
     (retract ?empty)
-    (assert hitted)
-    (assert
-        (hit
-            (x ?ex)
-            (y ?y)
-        )
-    )
+    (assert (hitted (x ?x) (y ?ey)))
+    (assert (hit (x ?ex) (y ?y)))
     (facts)
 )
 ; --------------------------------------------------
+
+;
+; ”бит корабль пометим клетки корабл€.
+;
+; ѕравило уничтожени€ корабл€ - влево.
+(defrule shipleft
+    ?ship <- (ship (x ?ex) (y ?y))
+    ?hit  <- (hit (x ?x) (y ?y))
+    (test  (= ?ex (+ ?x 1)))
+    =>
+    (retract ?hit)
+    (assert (ship (x ?x) (y ?y)))
+    (facts)
+)
+
+; ѕравило уничтожени€ корабл€ - право.
+(defrule shipright
+    ?ship <- (ship (x ?ex) (y ?y))
+    ?hit  <- (hit (x ?x) (y ?y))
+    (test  (= ?x (+ ?ex 1)))
+    =>
+    (retract ?hit)
+    (assert (ship (x ?x) (y ?y)))
+    (facts)
+)
+; ѕравило уничтожени€ корабл€ - вверх.
+(defrule shipup
+    ?ship <- (ship (x ?x) (y ?ey))
+    ?hit  <- (hit (x ?x) (y ?y))
+    (test  (= ?ey (+ ?y 1)))
+    =>
+    (retract ?hit)
+    (assert (ship (x ?x) (y ?y)))
+    (facts)
+)
+
+; ѕравило уничтожени€ корабл€ - вниз.
+(defrule shipdown
+    ?ship <- (ship (x ?x) (y ?ey))
+    ?hit  <- (hit (x ?x) (y ?y))
+    (test  (= ?y (+ ?ey 1)))
+    =>
+    (retract ?hit)
+    (assert (ship (x ?x) (y ?y)))
+    (facts)
+)
+
+; --------------------------------------------------
+;
+; ”бит корабль сделаем все клетки вокруг корабл€ промахами.
+;
+; ”бит корабль: сделать пустые клетки промахами слева.
+(defrule shipleft
+    (ship (x ?x1) (y ?y))
+    ?empty <- (empty (x ?ex) (y ?y))
+    (test (= ?x1 (+ ?ex 1)))
+    =>
+    (retract ?empty)
+    (assert (miss (x ?ex) (y ?y)))
+    (facts)
+)
+; ”бит корабль: сделать пустые клетки промахами справа.
+(defrule shipright
+    (ship (x ?x1) (y ?y))
+    ?empty <- (empty (x ?ex) (y ?y))
+    (test (= ?ex (+ ?x1 1)))
+    =>
+    (retract ?empty)
+    (assert (miss (x ?ex) (y ?y)))
+    (facts)
+)
+; ”бит корабль: сделать пустые клетки промахами снизу.
+(defrule shipdown
+    (ship (x ?x) (y ?y))
+    ?empty <- (empty (x ?x) (y ?ey))
+    (test (= ?ey (+ ?y 1)))
+    =>
+    (retract ?empty)
+    (assert (miss (x ?x) (y ?ey)))
+    (facts)
+)
+; ”бит корабль: сделать пустые клетки промахами сверху.
+(defrule shipup
+    (ship (x ?x) (y ?y))
+    ?empty <- (empty (x ?x) (y ?ey))
+    (test (= ?y (+ ?ey 1)))
+    =>
+    (retract ?empty)
+    (assert (miss (x ?x) (y ?ey)))
+    (facts)
+)
+; ”бит корабль: сделать пустые клетки промахами слева-сверху.
+(defrule shipupleft
+    (ship (x ?x1) (y ?y1))
+    ?empty <- (empty (x ?x2) (y ?y2))
+    (test (= ?x1 (+ ?x2 1)))
+    (test (= ?y1 (+ ?y2 1)))
+    =>
+    (retract ?empty)
+    (assert
+        (miss (x ?x2) (y ?y2))
+    )
+    (facts)
+)
+; ”бит корабль: сделать пустые клетки промахами справа-сверху.
+(defrule shipupright
+    (ship (x ?x1) (y ?y1))
+    ?empty <- (empty (x ?x2) (y ?y2))
+    (test (= ?x2 (+ ?x1 1)))
+    (test (= ?y1 (+ ?y2 1)))
+    =>
+    (retract ?empty)
+    (assert (miss (x ?x2) (y ?y2)))
+    (facts)
+)
+; ”бит корабль: сделать пустые клетки промахами слева-снизу.
+(defrule shipupleft
+    (ship (x ?x1) (y ?y1))
+    ?empty <- (empty (x ?x2) (y ?y2))
+    (test (= ?x1 (+ ?x2 1)))
+    (test (= ?y2 (+ ?y1 1)))
+    =>
+    (retract ?empty)
+    (assert (miss (x ?x2) (y ?y2)))
+    (facts)
+)
+; ”бит корабль: сделать пустые клетки промахами справа-снизу.
+(defrule shipupleft
+    (ship (x ?x1) (y ?y1))
+    ?empty <- (empty (x ?x2) (y ?y2))
+    (test (= ?x2 (+ ?x1 1)))
+    (test (= ?y2 (+ ?y1 1)))
+    =>
+    (retract ?empty)
+    (assert (miss (x ?x2) (y ?y2)))
+    (facts)
+)
+; -----------------------s---------------------------
+
 ; Ќачальна€ расстановка попаданий и свободных €чеек на поле 1x3.
 (assert
     (hit
