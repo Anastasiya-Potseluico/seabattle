@@ -47,8 +47,9 @@
     ?empty <- (empty (x ?x) (y ?ey))
     (test (= ?y2 (+ ?y1 1)))
     (test (= ?ey (+ ?y2 1)))
-    (test hitted)
+    ?nothitted <- (nothitted)
     =>
+    (retract ?nothitted)
     (retract ?empty)
     (assert (hitted (x ?x) (y ?ey)))
     (assert (hit (x ?x) (y ?ey)))
@@ -62,8 +63,9 @@
     ?empty <- (empty (x ?x) (y ?ey))
     (test (= ?y2 (+ ?y1 1)))
     (test (= ?y1 (+ ?ey 1)))
-    (test hitted)
+    ?nothitted <- (nothitted)
     =>
+    (retract ?nothitted)
     (retract ?empty)
     (assert (hitted (x ?x) (y ?ey)))
     (assert (hit (x ?x) (y ?ey)))
@@ -76,8 +78,9 @@
     ?empty <- (empty (x ?ex) (y ?y))
     (test (= ?x2 (+ ?x1 1)))
     (test (= ?ex (+ ?x2 1)))
-    (test hitted)
+    ?nothitted <- (nothitted)
     =>
+    (retract ?nothitted)
     (retract ?empty)
     (assert (hitted (x ?x) (y ?ey)))
     (assert (hit (x ?ex) (y ?y)))
@@ -91,8 +94,9 @@
     ?empty <- (empty (x ?ex) (y ?y))
     (test (= ?x2 (+ ?x1 1)))
     (test (= ?x1 (+ ?ex 1)))
-    (test hitted)
+    ?nothitted <- (nothitted)
     =>
+    (retract ?nothitted)
     (retract ?empty)
     (assert (hitted (x ?x) (y ?ey)))
     (assert (hit (x ?ex) (y ?y)))
@@ -108,7 +112,7 @@
     (hit (x ?x) (y ?y1))
     ?empty <- (empty (x ?x) (y ?ey))
     (test (= ?ey (+ ?y1 1)))
-    (test hitted)
+    (nothitted)
     =>
     (retract ?empty)
     (assert (hitted (x ?x) (y ?ey)))
@@ -121,8 +125,9 @@
     (hit (x ?x) (y ?y1))
     ?empty <- (empty (x ?x) (y ?ey))
     (test (= ?y1 (+ ?ey 1)))
-    (test hitted)
+    ?nothitted <- (nothitted)
     =>
+    (retract ?nothitted)
     (retract ?empty)
     (assert (hitted (x ?x) (y ?ey)))
     (assert (hit (x ?x) (y ?ey)))
@@ -133,8 +138,9 @@
     (hit (x ?x1) (y ?y))
     ?empty <- (empty (x ?ex) (y ?y))
     (test (= ?ex (+ ?x1 1)))
-    (test hitted)
+    ?nothitted <- (nothitted)
     =>
+    (retract ?nothitted)
     (retract ?empty)
     (assert (hitted (x ?x) (y ?ey)))
     (assert (hit (x ?ex) (y ?y)))
@@ -146,8 +152,9 @@
     (hit (x ?x1) (y ?y))
     ?empty <- (empty (x ?ex) (y ?y))
     (test (= ?x1 (+ ?ex 1)))
-    (test hitted)
+    ?nothitted <- (nothitted)
     =>
+    (retract ?nothitted)
     (retract ?empty)
     (assert (hitted (x ?x) (y ?ey)))
     (assert (hit (x ?ex) (y ?y)))
@@ -156,8 +163,9 @@
 ; ѕравило удара: если нет попаданий.
 (defrule newhit1left
     ?empty <- (empty (x ?ex) (y ?y))
-    (test hitted)
+    ?nothitted <- (nothitted)
     =>
+    (retract ?nothitted)
     (retract ?empty)
     (assert (hitted (x ?x) (y ?ey)))
     (assert (hit (x ?ex) (y ?y)))
@@ -301,7 +309,7 @@
     (assert (miss (x ?x2) (y ?y2)))
     (facts)
 )
-; -----------------------s---------------------------
+; --------------------------------------------------
 
 ; Ќачальна€ расстановка попаданий и свободных €чеек на поле 1x3.
 (assert
