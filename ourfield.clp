@@ -11,7 +11,7 @@
 (deftemplate miss (slot x) (slot y) )
 ; Шаблон, описывающий корабль.
 (deftemplate ship (slot x) (slot y) )
-; Шаблон, описывающий утонвший корабль.
+; Шаблон, описывающий утонувший корабль.
 (deftemplate drowned (slot x) (slot y) )
 
 ; Определим что корабль уничтожен
@@ -517,97 +517,6 @@
     (assert (drowned (x ?x1) (y ?y)))
     (retract ?hit2)
     (assert (drowned (x ?x2) (y ?y)))
-    (facts)
-)
-; --------------------------------------------------
-
-;
-; Убит корабль сделаем все клетки вокруг корабля промахами.
-;
-; Убит корабль: сделать пустые клетки промахами слева.
-(defrule shipleft
-    (drowned (x ?x1) (y ?y))
-    ?empty <- (empty (x ?ex) (y ?y))
-    (test (= ?x1 (+ ?ex 1)))
-    =>
-    (retract ?empty)
-    (assert (miss (x ?ex) (y ?y)))
-    (facts)
-)
-; Убит корабль: сделать пустые клетки промахами справа.
-(defrule shipright
-    (drowned (x ?x1) (y ?y))
-    ?empty <- (empty (x ?ex) (y ?y))
-    (test (= ?ex (+ ?x1 1)))
-    =>
-    (retract ?empty)
-    (assert (miss (x ?ex) (y ?y)))
-    (facts)
-)
-; Убит корабль: сделать пустые клетки промахами снизу.
-(defrule shipdown
-    (drowned (x ?x) (y ?y))
-    ?empty <- (empty (x ?x) (y ?ey))
-    (test (= ?ey (+ ?y 1)))
-    =>
-    (retract ?empty)
-    (assert (miss (x ?x) (y ?ey)))
-    (facts)
-)
-; Убит корабль: сделать пустые клетки промахами сверху.
-(defrule shipup
-    (drowned (x ?x) (y ?y))
-    ?empty <- (empty (x ?x) (y ?ey))
-    (test (= ?y (+ ?ey 1)))
-    =>
-    (retract ?empty)
-    (assert (miss (x ?x) (y ?ey)))
-    (facts)
-)
-; Убит корабль: сделать пустые клетки промахами слева-сверху.
-(defrule shipupleft
-    (drowned (x ?x1) (y ?y1))
-    ?empty <- (empty (x ?x2) (y ?y2))
-    (test (= ?x1 (+ ?x2 1)))
-    (test (= ?y1 (+ ?y2 1)))
-    =>
-    (retract ?empty)
-    (assert
-        (miss (x ?x2) (y ?y2))
-    )
-    (facts)
-)
-; Убит корабль: сделать пустые клетки промахами справа-сверху.
-(defrule shipupright
-    (drowned (x ?x1) (y ?y1))
-    ?empty <- (empty (x ?x2) (y ?y2))
-    (test (= ?x2 (+ ?x1 1)))
-    (test (= ?y1 (+ ?y2 1)))
-    =>
-    (retract ?empty)
-    (assert (miss (x ?x2) (y ?y2)))
-    (facts)
-)
-; Убит корабль: сделать пустые клетки промахами слева-снизу.
-(defrule shipupleft
-    (drowned (x ?x1) (y ?y1))
-    ?empty <- (empty (x ?x2) (y ?y2))
-    (test (= ?x1 (+ ?x2 1)))
-    (test (= ?y2 (+ ?y1 1)))
-    =>
-    (retract ?empty)
-    (assert (miss (x ?x2) (y ?y2)))
-    (facts)
-)
-; Убит корабль: сделать пустые клетки промахами справа-снизу.
-(defrule shipupleft
-    (drowned (x ?x1) (y ?y1))
-    ?empty <- (empty (x ?x2) (y ?y2))
-    (test (= ?x2 (+ ?x1 1)))
-    (test (= ?y2 (+ ?y1 1)))
-    =>
-    (retract ?empty)
-    (assert (miss (x ?x2) (y ?y2)))
     (facts)
 )
 ; --------------------------------------------------
