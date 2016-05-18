@@ -56,7 +56,7 @@ public class Player extends Agent{
             //enemyField.addUserfunction(new MarkShip());
             // Очистить базу фактов.
             enemyField.reset();
-            // Добавить в базу фактов свои корабли.
+            // TODO: Добавить в базу фактов свои корабли.
 
             // Запустить выполнение.
             //enemyField.run(MAX_PASSES);
@@ -72,7 +72,7 @@ public class Player extends Agent{
             //ourField.addUserfunction(new MarkShip());
             // Очистить базу фактов.
             ourField.reset();
-            // Добавить в базу фактов пустые клетки.
+            // TODO: Добавить в базу фактов пустые клетки.
 
             // Запустить выполнение.
             //ourField.run(MAX_PASSES);
@@ -118,10 +118,10 @@ public class Player extends Agent{
                 // Выбрать рандомный выстрел по пустым клеткам
 
             } else {
-                // Выбрать по правилам новые x и y.
+                // TODO: Выбрать по правилам новые x и y.
                 String x = "3";
                 String y = "3";
-                // Нужно использовать jess и получить от туда факт hitted, перед каждым выстрелом его нужно очистить
+                // TODO: Нужно использовать jess и получить от туда факт hitted, перед каждым выстрелом его нужно очистить
                 // Отослать сообщение об ударе
                 ACLMessage missMessage = new ACLMessage(ACLMessage.INFORM);
                 missMessage.addReceiver(_enemyAgent);
@@ -151,6 +151,7 @@ public class Player extends Agent{
         // Метод для проверки попадания врага в свой корабль
         // из jess получаем факт по позиции можно написать правило и который поможет нам результат получить
         // TODO: не использовать массив интов , заменить его на правила jess'а
+        // TODO: получить факт по координатам обновить базу фактов и отдать сообщение
         private void AnalyzeEnemyAttack(int x, int y) {
             if(x < 10 && x > -1 && y < 10 && y > -1) {
                 if (_playField[x][y] == 1) {
@@ -194,41 +195,16 @@ public class Player extends Agent{
                 System.out.print(fireState);
                 switch (fireState) {
                     case "miss":
-
+                        // TODO: Изменить базу фактов в jess о состоянии поля противника
                         break;
                     case "hit":
-
+                        // TODO: Изменить базу фактов в jess о состоянии поля противника
                         break;
                     case "ship":
-                        try {
-                            // Пометить клетки вокруг корабля как пустые
-
-                            // Изменить базу фактов в jess о состоянии поля противника
-                            FileReader program = new FileReader(new File("seabattlerules.clp"));
-                            Rete jess = new Rete();
-                            Jesp parser = new Jesp(program, jess);
-                            parser.parse(false);
-                            program.close();
-
-                            jess.addUserfunction(new MarkShip());
-
-                            Deftemplate factTemplate = jess.findDeftemplate("ship");
-                            // Очистить базу фактов.
-                            jess.reset();
-
-                            // Добавить факт - сообщение, проверяемое на спам.
-                            Fact ship = new Fact(factTemplate);
-                            //ship.setSlotValue("x", new Value(msg.getKey(), RU.INTEGER));
-                            //ship.setSlotValue("y", new Value(msg.getValue(), RU.STRING));
-                            jess.assertFact(ship);
-
-                            // Запустить выполнение.
-                            jess.run(MAX_PASSES);
-                        } catch (JessException | IOException e) {
-                            e.printStackTrace();
-                        }
-                                break;
-                        }
+                        // Пометить клетки вокруг корабля как пустые
+                        // TODO: Изменить базу фактов в jess о состоянии поля противника
+                        break;
+                }
             } else {
                 block();
             }
