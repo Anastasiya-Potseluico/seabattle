@@ -40,9 +40,46 @@ public class Player extends Agent{
 
     private int _currentEnemyHittedX = -1;
     private int _currentEnemyHittedY = -1;
+    private Rete ourField;
+    private Rete enemyField;
 
     @Override
     protected void setup() {
+        // Изменить базу фактов в jess о состоянии поля противника
+        FileReader program = null;
+        try {
+            program = new FileReader(new File("seabattlerules.clp"));
+            enemyField = new Rete();
+            Jesp parser = new Jesp(program, enemyField);
+            parser.parse(false);
+            program.close();
+            //enemyField.addUserfunction(new MarkShip());
+            // Очистить базу фактов.
+            enemyField.reset();
+            // Добавить в базу фактов свои корабли.
+
+            // Запустить выполнение.
+            //enemyField.run(MAX_PASSES);
+        } catch (JessException|IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            program = new FileReader(new File("outfield.clp"));
+            ourField = new Rete();
+            Jesp parser = new Jesp(program, ourField);
+            parser.parse(false);
+            program.close();
+            //ourField.addUserfunction(new MarkShip());
+            // Очистить базу фактов.
+            ourField.reset();
+            // Добавить в базу фактов пустые клетки.
+
+            // Запустить выполнение.
+            //ourField.run(MAX_PASSES);
+        } catch (JessException|IOException e) {
+            e.printStackTrace();
+        }
+
         Scanner fileReader = null;
         try {
             File inputFile = new File("field1.txt");
@@ -84,7 +121,7 @@ public class Player extends Agent{
                 // Выбрать по правилам новые x и y.
                 String x = "3";
                 String y = "3";
-
+                // Нужно использовать jess и получить от туда факт hitted, перед каждым выстрелом его нужно очистить
                 // Отослать сообщение об ударе
                 ACLMessage missMessage = new ACLMessage(ACLMessage.INFORM);
                 missMessage.addReceiver(_enemyAgent);
@@ -112,6 +149,8 @@ public class Player extends Agent{
         }*/
 
         // Метод для проверки попадания врага в свой корабль
+        // из jess получаем факт по позиции можно написать правило и который поможет нам результат получить
+        // TODO: не использовать массив интов , заменить его на правила jess'а
         private void AnalyzeEnemyAttack(int x, int y) {
             if(x < 10 && x > -1 && y < 10 && y > -1) {
                 if (_playField[x][y] == 1) {
