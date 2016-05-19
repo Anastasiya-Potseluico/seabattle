@@ -42,59 +42,54 @@ public class Player extends Agent {
         FileReader program = null;
         _me = getAID();
         try {
+            Deftemplate emptyTemplate;
+            Deftemplate shipTemplate;
+            Deftemplate endgameTemplate;
+            Deftemplate drownedshipTemplate;
+            Jesp parser;
+            Fact cell;
+            Scanner fileReader = null;
+            File inputFile;
+
+            // Заполним вражеское поля пустыми клетками
             program = new FileReader(new File("seabattlerules.clp"));
             _enemyField = new Rete();
-            Jesp parser = new Jesp(program, _enemyField);
+            parser = new Jesp(program, _enemyField);
             parser.parse(false);
             program.close();
+            emptyTemplate = _enemyField.findDeftemplate("empty");
+            endgameTemplate = _enemyField.findDeftemplate("notgameover");
             // Очистить базу фактов.
             _enemyField.reset();
             // Добавить в базу фактов пустые клетки.
-            Deftemplate emptyTemplate = _enemyField.findDeftemplate("empty");
-            Deftemplate endgameTemplate = _enemyField.findDeftemplate("notgameover");
             for (int i = 0 ; i < 10; i++) {
                 for (int j = 0; j < 10; j++) {
-                    Fact empty = new Fact(emptyTemplate);
-                    empty.setSlotValue("x", new Value(i, RU.INTEGER));
-                    empty.setSlotValue("y", new Value(j, RU.INTEGER));
-                    _enemyField.assertFact(empty);
+                    cell = new Fact(emptyTemplate);
+                    cell.setSlotValue("x", new Value(i, RU.INTEGER));
+                    cell.setSlotValue("y", new Value(j, RU.INTEGER));
+                    _enemyField.assertFact(cell);
                 }
             }
-            Fact cell = new Fact(endgameTemplate);
+            cell = new Fact(endgameTemplate);
             _enemyField.assertFact(cell);
-            // Запустить выполнение.
-            //_enemyField.run(MAX_PASSES);
-        } catch (JessException|IOException e) {
-            e.printStackTrace();
-        }
-        try {
             program = new FileReader(new File("ourfield.clp"));
             _ourField = new Rete();
-            Jesp parser = new Jesp(program, _ourField);
+            parser = new Jesp(program, _ourField);
             parser.parse(false);
             program.close();
-            //_ourField.addUserfunction(new MarkShip());
-            // Очистить базу фактов.
             _ourField.reset();
-            Scanner fileReader = null;
-
-            Deftemplate emptyTemplate = _ourField.findDeftemplate("empty");
-            Deftemplate shipTemplate = _ourField.findDeftemplate("ship");
-            Deftemplate endgameTemplate = _enemyField.findDeftemplate("notgameover");
-            Deftemplate drownedshipTemplate = _ourField.findDeftemplate("drownedship");
-            try {
-                File inputFile = new File("field1.txt");
-                inputFile.setReadable(true);
-                System.out.println(inputFile.exists());
-                boolean ok = inputFile.canRead();
-                fileReader = new Scanner(inputFile);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
+            emptyTemplate = _ourField.findDeftemplate("empty");
+            endgameTemplate = _ourField.findDeftemplate("notgameover");
+            drownedshipTemplate = _ourField.findDeftemplate("drownedship");
+            shipTemplate = _ourField.findDeftemplate("ship");
+            // Заполнить поле своими кораблями
+            inputFile = new File("field1.txt");
+            inputFile.setReadable(true);
+            boolean ok = inputFile.canRead();
+            fileReader = new Scanner(inputFile);
             for(int i = 0; i < 10; i ++) {
                 String result = fileReader.nextLine();
                 String items[] = result.split(" ");
-                Fact cell;
                 for(int j = 0; j < items.length; j ++) {
                     cell = (Integer.parseInt(items[j]) == 1) ? new Fact(shipTemplate) : new Fact(emptyTemplate);
                     cell.setSlotValue("x", new Value(i, RU.INTEGER));
@@ -102,20 +97,21 @@ public class Player extends Agent {
                     _ourField.assertFact(cell);
                 }
             }
-            Fact cell = new Fact(endgameTemplate);
+            cell = new Fact(endgameTemplate);
             _ourField.assertFact(cell);
-            cell = new Fact(drownedshipTemplate);
-            cell.setSlotValue("y", new Value(0, RU.INTEGER));
-            _ourField.assertFact(cell);
-            // Запустить выполнение.
-            //_ourField.run(MAX_PASSES);
         } catch (JessException|IOException e) {
             e.printStackTrace();
         }
+        // Связем агентов
+        DFAgentDescription agentDescription;
+        ServiceDescription myService;
+        DFAgentDescription agentTemplate;
+        ServiceDescription service;
+        DFAgentDescription result[];
         while(_enemy == null) {
-            DFAgentDescription agentDescription = new DFAgentDescription();
+            agentDescription = new DFAgentDescription();
             agentDescription.setName(getAID());
-            ServiceDescription myService = new ServiceDescription();
+            myService = new ServiceDescription();
             myService.setType("service -name");
             myService.setName("my-service"+ _me.getName());
             agentDescription.addServices(myService);
@@ -125,12 +121,12 @@ public class Player extends Agent {
                 e.printStackTrace();
             }
 
-            DFAgentDescription agentTemplate = new DFAgentDescription();
-            ServiceDescription service = new ServiceDescription();
+            agentTemplate = new DFAgentDescription();
+            service = new ServiceDescription();
             myService.setType("service -name");
             agentTemplate.addServices(service);
             try {
-                DFAgentDescription result[] = DFService.search(this, agentTemplate);
+                result = DFService.search(this, agentTemplate);
                 for (int i = 0; i < result.length; i++) {
                     if (!result[i].getName().getName().equals(_me.getName())) {
                         _enemy = result[i].getName();
@@ -141,55 +137,46 @@ public class Player extends Agent {
                 e.printStackTrace();
             }
         }
+        // Добавим необходимые поведения.
         addBehaviour(new GetResponseFromEnemy());
-        //addBehaviour(new MakeFire());
         addBehaviour(new GetCoordinatesFromEnemy());
         addBehaviour(new FirstShot());
     }
 
-    /*// Класс атаки на вражескую клетку
-    class MakeFire extends OneShotBehaviour {
-
-        private MessageTemplate _mt;
-
-        @Override*/
-        public void action111() {
-
-            System.out.println("Action111");
-            // Если нет убитых клеток на поле врага - отправить любую пустую клетку, иначе
-            // Отправить две координаты на основании прави
-            try {
-                Deftemplate hittedTemplate = _enemyField.findDeftemplate("hitted");
-                Deftemplate nothittedTemplate = _enemyField.findDeftemplate("nothitted");
-                Fact cell;
-                cell = new Fact(nothittedTemplate);
-                _enemyField.assertFact(cell);
-                _enemyField.run(MAX_PASSES);
-                Iterator list = _enemyField.listFacts();
-                int x,y;
-                String rmsg = "";
-                while(list.hasNext()) {
-                    Fact temp = (Fact) list.next();
-                    if(hittedTemplate.equals(temp.getDeftemplate())) {
-                        x = Integer.parseInt(temp.getSlotValue("x").toString());
-                        y = Integer.parseInt(temp.getSlotValue("y").toString());
-                        rmsg = x + "," + y;
-                    }
+    public void hit() {
+        // Если нет убитых клеток на поле врага - отправить любую пустую клетку, иначе
+        // Отправить две координаты на основании прави
+        try {
+            Deftemplate hittedTemplate = _enemyField.findDeftemplate("hitted");
+            Deftemplate nothittedTemplate = _enemyField.findDeftemplate("nothitted");
+            Fact cell;
+            cell = new Fact(nothittedTemplate);
+            _enemyField.assertFact(cell);
+            _enemyField.run(MAX_PASSES);
+            Iterator list = _enemyField.listFacts();
+            int x,y;
+            String rmsg = "";
+            while(list.hasNext()) {
+                Fact temp = (Fact) list.next();
+                if(hittedTemplate.equals(temp.getDeftemplate())) {
+                    x = Integer.parseInt(temp.getSlotValue("x").toString());
+                    y = Integer.parseInt(temp.getSlotValue("y").toString());
+                    rmsg = x + "," + y;
                 }
-                if (rmsg != "") {
-                    // Отправить сообщение о выстреле
-                    ACLMessage missMessage = new ACLMessage(ACLMessage.INFORM_REF);
-                    missMessage.addReceiver(_enemy);
-                    missMessage.setConversationId("hitCoordinates");
-                    missMessage.setContent(rmsg);
-                    this.send(missMessage);
-                    System.out.println("Sent coordinates:" + rmsg);
-                }
-            } catch (JessException e) {
-                e.printStackTrace();
             }
+            if (rmsg != "") {
+                // Отправить сообщение о выстреле
+                ACLMessage missMessage = new ACLMessage(ACLMessage.INFORM_REF);
+                missMessage.addReceiver(_enemy);
+                missMessage.setConversationId("hitCoordinates");
+                missMessage.setContent(rmsg);
+                this.send(missMessage);
+                System.out.println("Sent coordinates:" + rmsg);
+            }
+        } catch (JessException e) {
+            e.printStackTrace();
         }
-   // }
+    }
 
     // Класс для получения сообщения с результатом атаки на вражескую клетку
     class GetResponseFromEnemy extends CyclicBehaviour {
@@ -204,7 +191,7 @@ public class Player extends Agent {
             if (msg != null) {
                 String fireState = msg.getContent();
                 String[] content = fireState.split(",");
-                System.out.print("GetMassage:" + fireState + " " + content[0] );
+                System.out.println("GetMassage:" + fireState + " " + content[0] );
                 String rmsg = "";
                 int x,y;
                 if (content.equals("over")) {
@@ -263,7 +250,7 @@ public class Player extends Agent {
                         cell.setSlotValue("x", new Value(x, RU.INTEGER));
                         cell.setSlotValue("y", new Value(y, RU.INTEGER));
                         _enemyField.assertFact(cell);
-                        _enemyField.run(MAX_PASSES);
+                        _enemyField.run(4);
                         if (cell.getDeftemplate().equals(shipTemplate) || cell.getDeftemplate().equals(hitTemplate)) {
                             list = _enemyField.listFacts();
                             while (list.hasNext()) {
@@ -273,8 +260,7 @@ public class Player extends Agent {
                                 }
 
                             }
-                            //addBehaviour(new MakeFire());
-                            action111();
+                            hit();
                         }
 
                     } catch (JessException e) {
@@ -298,8 +284,7 @@ public class Player extends Agent {
         public void action() {
             ACLMessage msg = myAgent.receive(this._mt);
             if (msg != null) {
-                //addBehaviour(new MakeFire());
-                action111();
+                hit();
                 block();
             } else {
                 block();
@@ -364,6 +349,7 @@ public class Player extends Agent {
                                         } else if (temp.getDeftemplate().equals(drownedTemplate)) {
                                             rmsg = "ship";
                                             drownedship++;
+                                            System.out.println("Drownedship:" + drownedship);
                                         }
                                         rmsg += "," + x + "," + y;
                                     }
@@ -386,8 +372,7 @@ public class Player extends Agent {
                                 myAgent.send(missMessage);
                                 System.out.println("Sent message:" + rmsg);
                                 if (needHit && drownedship != 10) {
-                                    action111();
-                                    //addBehaviour(new MakeFire());
+                                    hit();
                                 }
                                 if (drownedship == 10) {
                                     removeBehaviour(new GetCoordinatesFromEnemy());
@@ -402,30 +387,10 @@ public class Player extends Agent {
                     }
                 } else {
                     System.out.println("Only two coordinates are available to be sent!");
-                    //coordinates.length == 3 && _enemy!= null
                 }
             } else {
                 block();
             }
-        }
-    }
-    class MarkShip implements Userfunction {
-        @Override
-        public String getName() {
-            return "markship";
-        }
-
-        @Override
-        public Value call(ValueVector valueVector, Context context) throws JessException {
-
-            ACLMessage reportSpam = new ACLMessage(ACLMessage.REQUEST);
-            //reportSpam.addReceiver(_boxAgent);
-            //reportSpam.setConversationId("markBoatAsShip");
-            //reportSpam.setContent(valueVector.get(1).stringValue(context));
-            //myAgent.send(reportSpam);
-            System.out.println("Sent a ship message.");
-
-            return Funcall.TRUE;
         }
     }
 }
