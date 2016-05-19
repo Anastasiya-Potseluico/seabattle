@@ -1,0 +1,38 @@
+\documentclass[a4paper,english,russian]{article}
+\usepackage[left=3cm,right=1cm,
+        top=2cm,bottom=2cm,bindingoffset=0cm]{geometry}
+\usepackage{graphicx}
+\usepackage{mathtools}
+\usepackage{indentfirst}
+\usepackage{multirow}
+\usepackage[inline]{enumitem}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+\usepackage{listings}
+\begin{document}
+\begin{tabular}{|c|l|l|}
+\hline    Лабораторная работа № 3 & Студент, Группа & Поцелуйко А.С., Клевцов В.А., ПрИн-1Н\\ \cline{2-3} 
+                          Разработка агентоориентированной          & Преподаватель & Кульцова М.Б. \\ \cline{2-3} 
+           системы принятия решений.                         & Оценка & \\ \hline 
+\end{tabular}
+\\
+\section{Цель работы} % (fold)
+\par Перед нами стояла задача, реализации агентоориентированой системы на основе JADE и JESS.
+\section{Задание} % (fold)
+\par Создание игры "морской бой" на основе агентов и рассуждения основанного на фактах.
+\section{Реализация} % (fold)
+\par Принципиальным решением был отказ он дублирования данныих и перевод все принимаех решений в Jess.
+\par Суммарно было разработано 135 правил, позволяющих реализовать простой искуственный интеллект позволяющий играть в "морской бой".
+\par Правило позволяют определить:
+\begin{enumerate}
+    \item 4х палубный корабль утонул(16)
+    \item 3х палубный корабль утонул(16)
+    \item 2х палубный корабль утонул(16)
+    \item 1х палубный корабль утонул(64)
+    \item закрасить клетки вокруг корабля помахами(что бы агенты не стреляли туда)(12)
+    \item выбрать позицию следующего выстрела(9)
+    \item определить результат выстрела(2)
+\end{enumerate}
+\par Вне правил было реализовано определение конца игры и связываение агентов.
+\end{document}
